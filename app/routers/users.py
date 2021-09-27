@@ -25,5 +25,5 @@ async def get_users(request: Request, skip: int = 0, limit: int = 2):
 @router.get("/users/{user_id}", response_model=User)
 async def get_user(user_id: str, request: Request):
     if (user := await request.app.db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
-        return user
+        return User.from_mongo(user)
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")

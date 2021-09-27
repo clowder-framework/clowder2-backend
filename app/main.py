@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.dependencies import get_query_token, get_token_header
-from app.routers import items, users, datasets, foods
+from app.routers import items, users, datasets
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
 

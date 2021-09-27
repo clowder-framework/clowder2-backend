@@ -30,8 +30,8 @@ async def get_datasets(request: Request, skip: int = 0, limit: int = 2):
     return datasets
 
 
-@router.get("/datasets/{dataset_id}", response_model=Dataset)
+@router.get("/datasets/{dataset_id}")
 async def get_dataset(dataset_id: str, request: Request):
-    if (dataset := await request.app.db["datassets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        return dataset
-    raise HTTPException(status_code=404, detail=f"User {dataset_id} not found")
+    if (dataset := await request.app.db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        return Dataset.from_mongo(dataset)
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
