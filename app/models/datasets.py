@@ -10,9 +10,9 @@ from app.models.mongomodel import OID, MongoModel
 class Dataset(MongoModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
-    description: str = None
-    views: int
-    downloads: int = None
+    description: str = ""
+    views: int = 0
+    downloads: int = 0
 
 
 # class MongoDataset(Document):

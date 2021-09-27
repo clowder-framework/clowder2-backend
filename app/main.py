@@ -6,14 +6,13 @@ from fastapi import Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.dependencies import get_query_token, get_token_header
-from app.routers import items, users, datasets
+from app.routers import users, datasets
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
 
 app = FastAPI()
 
 app.include_router(users.router)
-app.include_router(items.router)
 app.include_router(datasets.router)
 
 

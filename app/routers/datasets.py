@@ -15,11 +15,10 @@ connect(host=db)
 
 @router.post('/datasets', response_model=Dataset)
 async def save_dataset(body: Dataset, request: Request):
+    body = body
     res = await request.app.db["datasets"].insert_one(body.mongo())
     found = await request.app.db["datasets"].find_one({'_id': res.inserted_id})
     return Dataset.from_mongo(found)
-    # dataset = MongoDataset(**body.dict()).save()
-    # return Dataset(**dataset.dict())
 
 
 @router.get("/datasets", response_model=List[Dataset])
