@@ -3,9 +3,10 @@ from typing import Optional
 from bson import ObjectId
 from mongoengine import Document, StringField, IntField, DynamicDocument
 from pydantic import BaseModel, Field
+from app.models.mongomodel import OID, MongoModel
 
 
-class Dataset(BaseModel):
+class Dataset(MongoModel):
     name: str
     description: str = None
     views: int
