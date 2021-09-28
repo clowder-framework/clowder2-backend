@@ -11,3 +11,4 @@ from app.models.mongomodel import OID, MongoModel
 class User(MongoModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str = Field()
+    hashed_password: str = Field()

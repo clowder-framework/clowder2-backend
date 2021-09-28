@@ -9,13 +9,13 @@ from app.models.datasets import Dataset, MongoDataset
 
 router = APIRouter()
 
-DATABASE_URI = os.environ["MONGODB_URL"]
+DATABASE_URI = "mongodb://127.0.0.1:27017"
 db=DATABASE_URI+"/clowder"
 connect(host=db)
 
 @router.post('/datasets', response_model=Dataset)
 async def save_dataset(body: Dataset, request: Request):
-    body = body
+
     res = await request.app.db["datasets"].insert_one(body.mongo())
     found = await request.app.db["datasets"].find_one({'_id': res.inserted_id})
     return Dataset.from_mongo(found)
