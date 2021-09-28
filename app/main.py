@@ -74,6 +74,8 @@ async def shutdown_db_client():
 async def getToken(username: str, password: str):
     print('username used is:' + username)
     print('password used is: ' + password)
+    if (user := await app.db["users"].find_one({"name": username})) is not None:
+        return {'username':username}
     return {'status':'none'}
 
 
