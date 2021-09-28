@@ -37,3 +37,9 @@ async def get_user(user_id: str, request: Request):
     if (user := await request.app.db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
         return User.from_mongo(user)
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+
+@router.get("/users/username/{username}", response_model=User)
+async def get_user_by_name(username: str, request: Request):
+    if (user := await request.app.db["users"].find_one({"name": username})) is not None:
+        return User.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {username} not found")
