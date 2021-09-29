@@ -12,6 +12,7 @@ from app.models.users import User
 from auth import AuthHandler
 from mongoengine import connect
 
+from pydantic import BaseModel
 
 DATABASE_URI = "mongodb://127.0.0.1:27017"
 db=DATABASE_URI+"/clowder"
@@ -28,14 +29,18 @@ app.include_router(users.router)
 app.include_router(datasets.router)
 app.include_router(collections.router)
 
+class AuthDetails(BaseModel):
+    username: str
+    password: str
+
 
 async def authenticate_user(username: str, password: str):
     user = await app.db["users"].find_one({"name": username})
     current_user = User.from_mongo(user)
     if not user:
-        return False
+        return None
     if not current_user.verify_password(password):
-        return False
+        return None
     return current_user
 
 
@@ -55,8 +60,27 @@ async def shutdown_db_client():
     pass
 
 
+@app.post('/login')
+async def login(auth_details: AuthDetails):
+    try:
+        username = auth_details.username
+        password = auth_details.password
+        authenticated_user = await authenticate_user(username, password)
+        if authenticated_user is not None:
+            token = auth_handler.encode_token(username)
+            return {'token': token}
+    except Exception as e:
+        print(e)
+    return {'token': "none"}
 
 
+@app.get('/unprotected')
+def unprotected():
+    return { 'hello': 'world' }
+
+@app.get('/protected')
+def protected(username=Depends(auth_handler.auth_wrapper)):
+    return { 'name': username }
 
 
 
