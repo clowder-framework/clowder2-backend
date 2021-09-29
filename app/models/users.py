@@ -6,7 +6,9 @@ from mongoengine import Document, StringField, IntField, DynamicDocument, connec
 from pydantic import BaseModel, Field
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import OID, MongoModel
-import bcrypt
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class User(MongoModel):
@@ -15,4 +17,4 @@ class User(MongoModel):
     hashed_password: str = Field()
 
     def verify_password(self, password):
-        return bcrypt.verify(password, self.password_hash)
+        return pwd_context.verify(password, self.hashed_password)

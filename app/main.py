@@ -9,16 +9,15 @@ from passlib.context import CryptContext
 from app.dependencies import get_query_token, get_token_header
 from app.routers import users, datasets, collections
 from app.models.users import User
-import jwt
-from typing import Dict
-import time
+from auth import AuthHandler
+from mongoengine import connect
 
-SECRET_KEY = "secretkey"
-ALGORITHM = "HS256"
 
-JWT_SECRET = SECRET_KEY
-JWT_ALGORITHM = ALGORITHM
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+DATABASE_URI = "mongodb://127.0.0.1:27017"
+db=DATABASE_URI+"/clowder"
+connect(host=db)
+
+auth_handler = AuthHandler()
 
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
@@ -31,12 +30,15 @@ app.include_router(collections.router)
 
 
 async def authenticate_user(username: str, password: str):
-    user = await User.get(username=username)
+    user = await app.db["users"].find_one({"name": username})
+    current_user = User.from_mongo(user)
     if not user:
         return False
-    if not user.verify_password(password):
+    if not current_user.verify_password(password):
         return False
-    return user
+    return current_user
+
+
 
 
 @app.on_event("startup")
@@ -61,6 +63,14 @@ async def shutdown_db_client():
 @app.get("/")
 async def root():
     return {"message": "Hello World!"}
+
+@app.post("/signin")
+async def sign_in(request: Request):
+    request_json = await request.json()
+    username = request_json["username"]
+    password = request_json["password"]
+    current_user = await authenticate_user(username, password)
+    return current_user
 
 
 if __name__ == "__main__":
