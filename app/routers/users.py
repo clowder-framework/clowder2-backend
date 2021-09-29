@@ -21,7 +21,7 @@ async def save_user(request: Request):
     new_user = User(name=request_json["name"], hashed_password=hashed_password)
     res = await request.app.db["users"].insert_one(new_user.mongo())
     found = await request.app.db["users"].find_one({'_id': res.inserted_id})
-    return User.from_mongo(found)
+    return User.from_mongo(found).dict(exclude={'create_at'})
 
 
 @router.get("/users", response_model=List[User])

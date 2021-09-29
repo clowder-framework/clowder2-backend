@@ -1,12 +1,14 @@
 import os
-
+import json
 import motor
 import uvicorn
 from fastapi import Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import APIRouter, Request, HTTPException
 from passlib.context import CryptContext
 from app.dependencies import get_query_token, get_token_header
 from app.routers import users, datasets, collections
+from app.models.users import User
 import jwt
 from typing import Dict
 import time
@@ -27,34 +29,14 @@ app.include_router(users.router)
 app.include_router(datasets.router)
 app.include_router(collections.router)
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
 
-def verify_password(plain_password, hashed_password):
-    print('here')
-    as_hashed = get_password_hash(password=plain_password)
-    result = pwd_context.verify(plain_password, hashed_password)
-    return pwd_context.verify(plain_password, hashed_password)
-
-def token_response(token: str):
-    return {"access_token": token}
-
-def decodeJWT(token: str) -> dict:
-    try:
-        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return decoded_token if decoded_token["expires"] >= time.time() else None
-    except:
-        return {}
-
-def signJWT(user_id: str) -> Dict[str, str]:
-    payload = {
-        "user_id": user_id,
-        "expires": time.time() + 600
-    }
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-    return token_response(token)
-
+async def authenticate_user(username: str, password: str):
+    user = await User.get(username=username)
+    if not user:
+        return False
+    if not user.verify_password(password):
+        return False
+    return user
 
 
 @app.on_event("startup")
@@ -70,13 +52,8 @@ async def shutdown_db_client():
     # app.mongodb_client.close()
     pass
 
-@app.get("/token/{username}/{password}")
-async def getToken(username: str, password: str):
-    print('username used is:' + username)
-    print('password used is: ' + password)
-    if (user := await app.db["users"].find_one({"name": username})) is not None:
-        return {'username':username}
-    return {'status':'none'}
+
+
 
 
 
