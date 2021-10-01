@@ -2,21 +2,26 @@ import os
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from mongoengine import connect
-
+from pydantic import BaseModel
 from app.models.datasets import Dataset, MongoDataset
+from auth import AuthHandler
 
 router = APIRouter()
+
+auth_handler = AuthHandler()
 
 DATABASE_URI = "mongodb://127.0.0.1:27017"
 db=DATABASE_URI+"/clowder"
 connect(host=db)
 
-@router.post('/datasets', response_model=Dataset)
-async def save_dataset(body: Dataset, request: Request):
-
-    res = await request.app.db["datasets"].insert_one(body.mongo())
+@router.post('/datasets')
+async def save_dataset(request: Request, username=Depends(auth_handler.auth_wrapper)):
+    res = await request.app.db["users"].find_one({'name': username})
+    request_json = await request.json()
+    request_json["creator"] = res["_id"]
+    res = await request.app.db["datasets"].insert_one(request_json)
     found = await request.app.db["datasets"].find_one({'_id': res.inserted_id})
     return Dataset.from_mongo(found)
 

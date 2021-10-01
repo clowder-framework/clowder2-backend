@@ -80,8 +80,11 @@ def unprotected():
 
 @app.get('/protected')
 def protected(username=Depends(auth_handler.auth_wrapper)):
-    return { 'name': username }
+    return { 'name': username}
 
+@app.post('/protected')
+def protected(username=Depends(auth_handler.auth_wrapper)):
+    return { 'name': username, 'type':'post' }
 
 
 @app.get("/")
