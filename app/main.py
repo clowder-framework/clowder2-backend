@@ -67,7 +67,9 @@ async def login(auth_details: AuthDetails):
         password = auth_details.password
         authenticated_user = await authenticate_user(username, password)
         if authenticated_user is not None:
-            token = auth_handler.encode_token(username)
+            print(authenticated_user.name)
+            print(authenticated_user.id)
+            token = auth_handler.encode_token(str(authenticated_user.id))
             return {'token': token}
     except Exception as e:
         print(e)
@@ -79,12 +81,15 @@ def unprotected():
     return { 'hello': 'world' }
 
 @app.get('/protected')
-def protected(username=Depends(auth_handler.auth_wrapper)):
-    return { 'name': username}
+async def protected(userid=Depends(auth_handler.auth_wrapper)):
+    user = await users.get_user(userid)
+    username = user.name
+    return { 'name': username, 'id':userid}
 
 @app.post('/protected')
-def protected(username=Depends(auth_handler.auth_wrapper)):
-    return { 'name': username, 'type':'post' }
+async def protected(userid=Depends(auth_handler.auth_wrapper)):
+    user = await users.get_user(userid)
+    return { 'name': user.name, 'id':userid, 'type':'post'}
 
 
 @app.get("/")

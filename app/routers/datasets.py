@@ -17,8 +17,8 @@ db=DATABASE_URI+"/clowder"
 connect(host=db)
 
 @router.post('/datasets')
-async def save_dataset(request: Request, username=Depends(auth_handler.auth_wrapper)):
-    res = await request.app.db["users"].find_one({'name': username})
+async def save_dataset(request: Request, user_id=Depends(auth_handler.auth_wrapper)):
+    res = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
     request_json = await request.json()
     request_json["creator"] = res["_id"]
     res = await request.app.db["datasets"].insert_one(request_json)
@@ -27,10 +27,15 @@ async def save_dataset(request: Request, username=Depends(auth_handler.auth_wrap
 
 
 @router.get("/datasets", response_model=List[Dataset])
-async def get_datasets(request: Request, skip: int = 0, limit: int = 2):
+async def get_datasets(request: Request, user_id=Depends(auth_handler.auth_wrapper), skip: int = 0, limit: int = 2, mine=False):
     datasets = []
-    for doc in await request.app.db["datasets"].find().skip(skip).limit(limit).to_list(length=limit):
-        datasets.append(doc)
+    user = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
+    if mine:
+        for doc in await request.app.db["datasets"].find({"creator": ObjectId(user_id)}).skip(skip).limit(limit).to_list(length=limit):
+            datasets.append(doc)
+    else:
+        for doc in await request.app.db["datasets"].find().skip(skip).limit(limit).to_list(length=limit):
+            datasets.append(doc)
     return datasets
 
 
