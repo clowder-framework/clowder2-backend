@@ -1,6 +1,7 @@
 import os
 import json
 import motor
+from bson import ObjectId
 import uvicorn
 from fastapi import Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -30,12 +31,12 @@ app.include_router(datasets.router)
 app.include_router(collections.router)
 
 class AuthDetails(BaseModel):
-    username: str
+    name: str
     password: str
 
 
-async def authenticate_user(username: str, password: str):
-    user = await app.db["users"].find_one({"name": username})
+async def authenticate_user(name: str, password: str):
+    user = await app.db["users"].find_one({"name": name})
     current_user = User.from_mongo(user)
     if not user:
         return None
@@ -63,9 +64,9 @@ async def shutdown_db_client():
 @app.post('/login')
 async def login(auth_details: AuthDetails):
     try:
-        username = auth_details.username
+        name = auth_details.name
         password = auth_details.password
-        authenticated_user = await authenticate_user(username, password)
+        authenticated_user = await authenticate_user(name, password)
         if authenticated_user is not None:
             print(authenticated_user.name)
             print(authenticated_user.id)
@@ -82,13 +83,15 @@ def unprotected():
 
 @app.get('/protected')
 async def protected(userid=Depends(auth_handler.auth_wrapper)):
-    user = await users.get_user(userid)
-    username = user.name
-    return { 'name': username, 'id':userid}
+    result = await app.db["users"].find_one({"_id": ObjectId(userid)})
+    user = User.from_mongo(result)
+    name = user.name
+    return { 'name': name, 'id':userid}
 
 @app.post('/protected')
 async def protected(userid=Depends(auth_handler.auth_wrapper)):
-    user = await users.get_user(userid)
+    result = await app.db["users"].find_one({"_id": ObjectId(userid)})
+    user = User.from_mongo(result)
     return { 'name': user.name, 'id':userid, 'type':'post'}
 
 
@@ -99,9 +102,9 @@ async def root():
 @app.post("/signin")
 async def sign_in(request: Request):
     request_json = await request.json()
-    username = request_json["username"]
+    name = request_json["name"]
     password = request_json["password"]
-    current_user = await authenticate_user(username, password)
+    current_user = await authenticate_user(name, password)
     return current_user
 
 
