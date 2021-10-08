@@ -9,10 +9,6 @@ from app.models.collections import Collection
 
 router = APIRouter()
 
-DATABASE_URI = os.environ["MONGODB_URL"]
-db=DATABASE_URI+"/clowder"
-connect(host=db)
-
 @router.post('/collections', response_model=Collection)
 async def save_collection(body: Collection, request: Request):
     body = body

@@ -15,12 +15,7 @@ from mongoengine import connect
 
 from pydantic import BaseModel
 
-DATABASE_URI = "mongodb://127.0.0.1:27017"
-db=DATABASE_URI+"/clowder"
-connect(host=db)
-
 auth_handler = AuthHandler()
-
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
 

@@ -4,14 +4,8 @@ from bson import ObjectId
 from fastapi import APIRouter, Request, HTTPException
 from app.models.users import User
 from passlib.hash import bcrypt
-from mongoengine import connect
 
 router = APIRouter()
-
-DATABASE_URI = "mongodb://127.0.0.1:27017"
-db=DATABASE_URI+"/clowder"
-connect(host=db)
-
 
 @router.post('/users', response_model=User)
 async def save_user(request: Request):
