@@ -15,7 +15,7 @@ from mongoengine import connect
 
 from pydantic import BaseModel
 
-DATABASE_URI = "mongodb://127.0.0.1:27017"
+DATABASE_URI = os.getenv('MONGODB_URL',"mongodb://127.0.0.1:27017")
 db=DATABASE_URI+"/clowder"
 connect(host=db)
 

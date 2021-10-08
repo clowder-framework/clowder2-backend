@@ -12,9 +12,6 @@ router = APIRouter()
 
 auth_handler = AuthHandler()
 
-DATABASE_URI = "mongodb://127.0.0.1:27017"
-db=DATABASE_URI+"/clowder"
-connect(host=db)
 
 @router.post('/datasets')
 async def save_dataset(request: Request, user_id=Depends(auth_handler.auth_wrapper)):
