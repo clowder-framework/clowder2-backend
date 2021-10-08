@@ -7,6 +7,7 @@ from passlib.hash import bcrypt
 
 router = APIRouter()
 
+
 @router.post('/users', response_model=User)
 async def save_user(request: Request):
     request_json = await request.json()
