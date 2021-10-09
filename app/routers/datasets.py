@@ -4,6 +4,7 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, Request, HTTPException, Depends
 from app.models.datasets import Dataset
+from app.models.collections import Collection
 from auth import AuthHandler
 
 router = APIRouter()
@@ -37,4 +38,16 @@ async def get_datasets(request: Request, user_id=Depends(auth_handler.auth_wrapp
 async def get_dataset(dataset_id: str, request: Request):
     if (dataset := await request.app.db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         return Dataset.from_mongo(dataset)
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+@router.post("/datasets/{dataset_id}/addToCollection/{collection_id}")
+async def add_dataset_to_collection(dataset_id: str, collection_id: str, request: Request):
+    print('here')
+    dataset = await request.app.db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
+    if dataset is not None and collection is not None:
+        current_dataset = Dataset.from_mongo(dataset)
+        current_collection = Collection.from_mongo(collection)
+        updated_dataset = await request.app.db["datasets"].update_one({'_id': ObjectId(dataset_id)},{'$push': {'collections': ObjectId(collection_id)}})
+        updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$inc': {'dataset_count': 1}})
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
