@@ -12,9 +12,7 @@ class Collection(MongoModel):
     name: str
     description: str = ""
     author: PyObjectId
-    parent_collection_ids = List[PyObjectId]
-    child_collection_ids = List[PyObjectId]
-    dataset_count : int = 0
+    dataset_count: int = 0
 
 
 # class MongoDataset(Document):

@@ -12,9 +12,9 @@ auth_handler = AuthHandler()
 
 @router.post('/datasets')
 async def save_dataset(request: Request, user_id=Depends(auth_handler.auth_wrapper)):
-    res = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
+    user = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
     request_json = await request.json()
-    request_json["creator"] = res["_id"]
+    request_json["author"] = user["_id"]
     res = await request.app.db["datasets"].insert_one(request_json)
     found = await request.app.db["datasets"].find_one({'_id': res.inserted_id})
     return Dataset.from_mongo(found)
@@ -25,7 +25,7 @@ async def get_datasets(request: Request, user_id=Depends(auth_handler.auth_wrapp
     datasets = []
     user = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
     if mine:
-        for doc in await request.app.db["datasets"].find({"creator": ObjectId(user_id)}).skip(skip).limit(limit).to_list(length=limit):
+        for doc in await request.app.db["datasets"].find({"author": ObjectId(user_id)}).skip(skip).limit(limit).to_list(length=limit):
             datasets.append(doc)
     else:
         for doc in await request.app.db["datasets"].find().skip(skip).limit(limit).to_list(length=limit):

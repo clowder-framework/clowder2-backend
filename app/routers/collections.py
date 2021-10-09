@@ -2,17 +2,22 @@ import os
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from mongoengine import connect
 
 from app.models.collections import Collection
+from auth import AuthHandler
+
+auth_handler = AuthHandler()
 
 router = APIRouter()
 
 @router.post('/collections', response_model=Collection)
-async def save_collection(body: Collection, request: Request):
-    body = body
-    res = await request.app.db["collections"].insert_one(body.mongo())
+async def save_collection(request: Request, user_id=Depends(auth_handler.auth_wrapper)):
+    user = await request.app.db["users"].find_one({"_id": ObjectId(user_id)})
+    request_json = await request.json()
+    request_json["author"] = user["_id"]
+    res = await request.app.db["collections"].insert_one(request_json)
     found = await request.app.db["collections"].find_one({'_id': res.inserted_id})
     return Collection.from_mongo(found)
 

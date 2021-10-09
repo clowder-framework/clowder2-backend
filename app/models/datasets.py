@@ -14,7 +14,7 @@ class Dataset(MongoModel):
     description: str = ""
     views: int = 0
     downloads: int = 0
-    collections: List[PyObjectId]
+    collections: List[PyObjectId] = []
 
 
 # class MongoDataset(Document):
