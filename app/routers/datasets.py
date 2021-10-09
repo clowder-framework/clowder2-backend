@@ -50,4 +50,4 @@ async def add_dataset_to_collection(dataset_id: str, collection_id: str, request
         current_collection = Collection.from_mongo(collection)
         updated_dataset = await request.app.db["datasets"].update_one({'_id': ObjectId(dataset_id)},{'$push': {'collections': ObjectId(collection_id)}})
         updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$inc': {'dataset_count': 1}})
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found or Collection {collection_id} not found")
