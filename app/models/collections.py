@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import os
 from bson import ObjectId
 from mongoengine import Document, StringField, IntField, DynamicDocument, connect
@@ -11,6 +11,10 @@ class Collection(MongoModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
     description: str = ""
+    author: PyObjectId
+    parent_collection_ids = List[PyObjectId]
+    child_collection_ids = List[PyObjectId]
+    dataset_count : int = 0
 
 
 # class MongoDataset(Document):
