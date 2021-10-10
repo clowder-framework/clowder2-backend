@@ -42,12 +42,29 @@ async def get_dataset(dataset_id: str, request: Request):
 
 @router.post("/datasets/{dataset_id}/addToCollection/{collection_id}")
 async def add_dataset_to_collection(dataset_id: str, collection_id: str, request: Request):
-    print('here')
     dataset = await request.app.db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
     if dataset is not None and collection is not None:
         current_dataset = Dataset.from_mongo(dataset)
-        current_collection = Collection.from_mongo(collection)
-        updated_dataset = await request.app.db["datasets"].update_one({'_id': ObjectId(dataset_id)},{'$push': {'collections': ObjectId(collection_id)}})
-        updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$inc': {'dataset_count': 1}})
+        current_dataset_collections = current_dataset.collections
+        if ObjectId(collection_id) in current_dataset_collections:
+            return {'status': 'unnecessary'}
+        else:
+            updated_dataset = await request.app.db["datasets"].update_one({'_id': ObjectId(dataset_id)},{'$push': {'collections': ObjectId(collection_id)}})
+            updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$inc': {'dataset_count': 1}})
+            return {'status': 'ok'}
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found or Collection {collection_id} not found")
+
+@router.post("/datasets/{dataset_id}/removeFromCollection/{collection_id}")
+async def remove_dataset_from_collection(dataset_id: str, collection_id: str, request: Request):
+    dataset = await request.app.db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
+    if dataset is not None and collection is not None:
+        current_dataset = Dataset.from_mongo(dataset)
+        if ObjectId(collection_id) not in current_dataset.collections:
+            return {'status': 'unnecessary'}
+        else:
+            updated_dataset = await request.app.db["datasets"].update_one({'_id': ObjectId(dataset_id)},{'$pull': {'collections': ObjectId(collection_id)}})
+            updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$inc': {'dataset_count': -1}})
+            return {'status':'ok'}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found or Collection {collection_id} not found")
