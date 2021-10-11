@@ -46,7 +46,7 @@ async def get_collection(collection_id: str, request: Request):
     raise HTTPException(status_code=404, detail=f"Collection {collection_id} not found")
 
 @router.post("/collections/{collection_id}/addToParent/{parent_collection_id}")
-async def add_collection_to__parent_collection(collection_id: str, parent_collection_id: str, request: Request):
+async def add_collection_to_parent_collection(collection_id: str, parent_collection_id: str, request: Request):
     collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
     parent_collection = await request.app.db["collections"].find_one({"_id": ObjectId(parent_collection_id)})
     if collection is not None and parent_collection is not None:
