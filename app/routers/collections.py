@@ -45,8 +45,34 @@ async def get_collection(collection_id: str, request: Request):
         return Collection.from_mongo(collection)
     raise HTTPException(status_code=404, detail=f"Collection {collection_id} not found")
 
-@router.get("/collections/{collection_id}")
-async def get_collection(collection_id: str, request: Request):
-    if (collection := await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})) is not None:
-        return Collection.from_mongo(collection)
-    raise HTTPException(status_code=404, detail=f"Collection {collection_id} not found")
+@router.post("/collections/{collection_id}/addToParent/{parent_collection_id}")
+async def add_collection_to__parent_collection(collection_id: str, parent_collection_id: str, request: Request):
+    collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
+    parent_collection = await request.app.db["collections"].find_one({"_id": ObjectId(parent_collection_id)})
+    if collection is not None and parent_collection is not None:
+        current_collection = Collection.from_mongo(collection)
+        current_parent_collection = Collection.from_mongo(parent_collection)
+        can_add = check_can_add_parent_collection(current_collection, current_parent_collection)
+        if not can_add:
+            return {'status': 'unnecessary'}
+        else:
+            updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)},{'$push': {'parent_collections': ObjectId(parent_collection_id)}})
+            updated_parent_collection = await request.app.db["collections"].update_one({'_id': ObjectId(parent_collection_id)},{'$push': {'child_collections': ObjectId(collection_id)}})
+            return {'status': 'ok'}
+    raise HTTPException(status_code=404, detail=f"Collection {collection_id} not found or Collection {parent_collection_id} not found")
+
+@router.post("/collections/{collection_id}/removeFromParent/{parent_collection_id}")
+async def remove_dataset_from_collection(collection_id: str, parent_collection_id: str, request: Request):
+    collection = await request.app.db["collections"].find_one({"_id": ObjectId(collection_id)})
+    parent_collection = await request.app.db["collections"].find_one({"_id": ObjectId(parent_collection_id)})
+    if collection is not None and parent_collection is not None:
+        current_collection = Collection.from_mongo(collection)
+        current_parent_collection = Collection.from_mongo(parent_collection)
+        if current_collection.id in current_parent_collection.child_collections:
+            updated_parent_collection = await request.app.db["collections"].update_one({'_id': ObjectId(parent_collection_id)},{'$pull': {'child_collections': ObjectId(collection_id)}})
+        if current_parent_collection.id in current_collection.parent_collections:
+            updated_collection = await request.app.db["collections"].update_one({'_id': ObjectId(collection_id)}, {
+                '$pull': {'parent_collections': ObjectId(parent_collection_id)}})
+        else:
+            return {'status': 'ok'}
+    raise HTTPException(status_code=404, detail=f"Collection {collection_id} not found or Collection {parent_collection_id} not found")
