@@ -52,7 +52,7 @@ async def add_collection_to_parent_collection(collection_id: str, parent_collect
     if collection is not None and parent_collection is not None:
         current_collection = Collection.from_mongo(collection)
         current_parent_collection = Collection.from_mongo(parent_collection)
-        can_add = check_can_add_parent_collection(current_collection, current_parent_collection)
+        can_add = await check_can_add_parent_collection(current_collection, current_parent_collection)
         if not can_add:
             return {'status': 'unnecessary'}
         else:
