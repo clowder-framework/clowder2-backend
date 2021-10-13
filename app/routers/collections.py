@@ -13,7 +13,7 @@ auth_handler = AuthHandler()
 router = APIRouter()
 
 
-def check_can_add_parent_collection(child: Collection, parent: Collection):
+async def check_can_add_parent_collection(child: Collection, parent: Collection):
     if child.id in parent.child_collections or child.id == parent.id:
         return False
     for each_id in parent.parent_collections:
