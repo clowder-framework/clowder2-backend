@@ -16,6 +16,15 @@ auth_handler = AuthHandler()
 async def test():
     return {'ok':'test'}
 
+@router.get("/allfiles")
+async def get_all_files(request: Request):
+    files = []
+    skip = 0
+    limit = 300
+    for doc in await request.app.db["fileuploads"].find().skip(skip).limit(limit).to_list(length=limit):
+        files.append(doc)
+    return {'ok':'files'}
+
 @router.post("/files/")
 async def create_file(file: bytes = File(...)):
     print('here')
