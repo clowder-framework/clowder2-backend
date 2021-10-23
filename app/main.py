@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi import APIRouter, Request, HTTPException
 from passlib.context import CryptContext
 from app.dependencies import get_query_token, get_token_header
-from app.routers import users, datasets, collections
+from app.routers import users, datasets, collections, files
 from app.models.users import User
 from auth import AuthHandler
 from mongoengine import connect
@@ -24,6 +24,7 @@ app = FastAPI()
 app.include_router(users.router)
 app.include_router(datasets.router)
 app.include_router(collections.router)
+app.include_router(files.router)
 
 class AuthDetails(BaseModel):
     name: str
