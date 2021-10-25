@@ -15,6 +15,7 @@ class Dataset(MongoModel):
     views: int = 0
     downloads: int = 0
     collections: List[PyObjectId] = []
+    files: List[PyObjectId] = []
 
 
 # class MongoDataset(Document):
