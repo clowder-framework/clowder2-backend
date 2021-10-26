@@ -53,5 +53,5 @@ async def download_test(file_id: str, request: Request, background_tasks: Backgr
         if os.path.isfile(file_path):
             background_tasks.add_task(remove_file, file_path)
             return FileResponse(path=file_path, media_type='application/octet-stream', filename=filename)
-    return {"status":"file not found"}
+    return {"status": "file not found"}
 
