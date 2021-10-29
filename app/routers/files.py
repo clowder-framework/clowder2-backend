@@ -11,7 +11,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Request, HTTPException, Depends, File, UploadFile
 from app.models.datasets import Dataset
 from app.models.collections import Collection
-from auth import AuthHandler
+from ..auth import AuthHandler
 
 router = APIRouter()
 
