@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import users, datasets, collections, authentication, items
+from app.routers import users, datasets, collections, authentication, items, files
 
 # app = FastAPI(dependencies=[Depends(get_query_token)])
 
@@ -28,6 +28,7 @@ app.include_router(users.router)
 app.include_router(datasets.router)
 app.include_router(collections.router)
 app.include_router(authentication.router)
+app.include_router(files.router)
 app.include_router(items.router)
 
 
