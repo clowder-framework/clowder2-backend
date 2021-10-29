@@ -1,8 +1,6 @@
-import os
-import json
-import motor
-from bson import ObjectId
 import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Depends, FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi import APIRouter, Request, HTTPException
@@ -13,13 +11,27 @@ from app.models.users import User
 from auth import AuthHandler
 from mongoengine import connect
 
-from pydantic import BaseModel
+from app.routers import users, datasets, collections, authentication, items
 
-auth_handler = AuthHandler()
+# app = FastAPI(dependencies=[Depends(get_query_token)])
 
-app = FastAPI(dependencies=[Depends(get_query_token)])
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(users.router)
 app.include_router(datasets.router)
@@ -41,19 +53,17 @@ async def authenticate_user(name: str, password: str):
     return current_user
 
 
+app.include_router(authentication.router)
+app.include_router(items.router)
 
 
 @app.on_event("startup")
 async def startup_db_client():
-    # app.mongodb_client = AsyncIOMotorClient(settings.DB_URL)
-    # app.mongodb = app.mongodb_client[settings.DB_NAME]
-    app.mongo_client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
-    app.db = app.mongo_client.clowder
+    pass
 
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    # app.mongodb_client.close()
     pass
 
 
