@@ -12,7 +12,7 @@ from fastapi import (
     File,
     UploadFile,
 )
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import Json
 from pymongo import MongoClient
 from minio import Minio
@@ -58,7 +58,7 @@ async def save_file(
     return ClowderFile.from_mongo(found)
 
 
-@router.get("/files/{file_id}")
+@router.get("/files/{file_id}/blob")
 async def download_file(
     file_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -76,10 +76,26 @@ async def download_file(
         return response
 
 
-@router.get("/files/{file_id}/summary")
-async def get_file_summary(
-    file_id: str, db: MongoClient = Depends(dependencies.get_db)
+@router.delete("/files/{file_id}")
+async def delete_file(
+    file_id: str,
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
 ):
+    # TODO: Permissions checks
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        # Delete from Minio, then MongoDB
+        fs.remove_object(clowder_bucket, file_id)
+        db["files"].delete_one({"_id": ObjectId(file_id)})
+        return JSONResponse(
+            status_code=200, content={"status": f"File {file_id} deleted"}
+        )
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.get("/files/{file_id}")
+async def get_file_info(file_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         return ClowderFile.from_mongo(file)
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
