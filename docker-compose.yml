@@ -1,0 +1,57 @@
+version: '3.3'
+
+services:
+
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+#      - "--entrypoints.backend.address=:9000"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+#  backend:
+#    image: 'clowder/clowder-fastapi:${TAG-latest}'
+#    container_name: "clowder-fastapi"
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+#      - "traefik.http.routers.backend.rule=PathPrefix(`/clowder`)"
+##      - "traefik.http.routers.backend.Path=/clowder"
+##      - "traefik.http.routers.backend.entrypoints=clowder"
+#      - "traefik.http.services.backend.loadbalancer.server.port=9000"
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+#  mongo-express:
+#    image: mongo-express
+#    restart: always
+#    ports:
+#      - 8081:8081
+#    environment:
+#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+#      ME_CONFIG_MONGODB_ADMINPASSWORD: example

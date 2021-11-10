@@ -35,6 +35,12 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 ## Dev Environment Setup
 1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
 
+## Docker
+
+Build images with `docker compose -f docker.compose.yml build`
+
+Run docker stack with `docker compsoe up`
+
 # Notes
 
 Mongo ObjectId
