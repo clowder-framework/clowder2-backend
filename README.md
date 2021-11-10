@@ -39,7 +39,13 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 
 Build images with `docker compose -f docker.compose.yml build`
 
-Run docker stack with `docker compsoe up`
+Run docker stack with `docker compose up`
+
+Default url for backend will be `http://clowder.docker.localhost/` using a web browser. If using a different client (for
+example postman set the `HOST` header to `clowder.docker.localhost`).
+This variable is set using the `traefik.http.routers.backend.rule` for the backend service.
+
+To access the traefik dashboard go to `http://localhost:8080`. For the raw settings see `http://localhost:8080/api/rawdata`.
 
 # Notes
 
