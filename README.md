@@ -37,7 +37,7 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 
 ## Docker
 
-Build images with `docker compose -f docker.compose.yml build`
+Build images with `docker compose -f docker-compose.yml build`
 
 Run docker services with `docker compose up --scale backend=4`. This will start the services with four instances of the backend
 running in parallel.
@@ -47,6 +47,8 @@ example postman set the `HOST` header to `clowder.docker.localhost`).
 This variable is set using the `traefik.http.routers.backend.rule` for the backend service.
 
 To access the traefik dashboard go to `http://localhost:8080`. For the raw settings see `http://localhost:8080/api/rawdata`.
+
+Minio console is available at `minioconsole.docker.localhost`.
 
 # Notes
 
