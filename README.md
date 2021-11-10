@@ -39,7 +39,7 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 
 Build images with `docker compose -f docker.compose.yml build`
 
-Run docker stack with `docker compose up --scale backend=4`. This will start the stack with four intstances of the backend
+Run docker services with `docker compose up --scale backend=4`. This will start the services with four instances of the backend
 running in parallel.
 
 Default url for backend will be `http://clowder.docker.localhost/` using a web browser. If using a different client (for
