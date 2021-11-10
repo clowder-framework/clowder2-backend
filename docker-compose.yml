@@ -33,7 +33,7 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=80"
 
   mongo:
-    image: mongo
+    image: mongo:5.0
     restart: always
     volumes:
       - mongo:/data/db
