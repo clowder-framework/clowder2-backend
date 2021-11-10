@@ -18,12 +18,13 @@ services:
 
   backend:
     image: 'clowder/clowder-fastapi:${TAG-latest}'
-    container_name: "clowder-fastapi"
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       MONGODB_URL: mongodb://mongo:27017
+    depends_on:
+      - mongo
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`clowder.docker.localhost`)"
