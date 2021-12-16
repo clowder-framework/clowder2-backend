@@ -26,6 +26,48 @@ router = APIRouter()
 
 auth_handler = AuthHandler()
 
+@router.post("/{dataset_id}/uploadMultiple")
+async def save_files(
+        dataset_id: str,
+        user_id=Depends(auth_handler.auth_wrapper),
+        db: MongoClient = Depends(dependencies.get_db),
+        fs: Minio = Depends(dependencies.get_fs),
+        files: List[UploadFile] = File(...)
+):
+    uploaded_files = []
+
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    if dataset is not None and user is not None:
+        for file in files:
+            f = dict()
+            f["name"] = file.filename
+            f["creator"] = user["_id"]
+            f["views"] = 0
+            f["downloads"] = 0
+            new_file = await db["files"].insert_one(f)
+            found = await db["files"].find_one({"_id": new_file.inserted_id})
+
+            new_file_id = found["_id"]
+
+            updated_dataset = await db["datasets"].update_one(
+                {"_id": ObjectId(dataset_id)}, {"$push": {"files": ObjectId(new_file_id)}}
+            )
+
+            # Second, use unique ID as key for file storage
+            while content := file.file.read(
+                    settings.MINIO_UPLOAD_CHUNK_SIZE
+            ):  # async read chunk
+                fs.put_object(
+                    settings.MINIO_BUCKET_NAME,
+                    str(new_file.inserted_id),
+                    io.BytesIO(content),
+                    length=-1,
+                    part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+                )  # async write chunk to minio
+            uploaded_files.append(ClowderFile.from_mongo(found))
+    return uploaded_files
+
 
 @router.post("/{dataset_id}", response_model=ClowderFile)
 async def save_file(
