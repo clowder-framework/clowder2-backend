@@ -32,8 +32,7 @@ async def save_files(
         user_id=Depends(auth_handler.auth_wrapper),
         db: MongoClient = Depends(dependencies.get_db),
         fs: Minio = Depends(dependencies.get_fs),
-        files: List[UploadFile] = File(...),
-        file_info: List[Optional[Json[ClowderFile]]] = None,
+        files: List[UploadFile] = File(...)
 ):
     uploaded_files = []
 
