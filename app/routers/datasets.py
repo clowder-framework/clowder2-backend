@@ -49,7 +49,8 @@ async def get_datasets(
     mine=False,
 ):
     datasets = []
-    if mine:
+    # FIXME revert to query parameter
+    if False:
         for doc in (
             await db["datasets"]
             .find({"author.id": ObjectId(user_id)})
