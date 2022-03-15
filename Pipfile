@@ -17,6 +17,7 @@ minio = "*"
 python-multipart = "*"
 pipfile = "*"
 email-validator = "*"
+pika = "*"
 
 [dev-packages]
 requests = "*"

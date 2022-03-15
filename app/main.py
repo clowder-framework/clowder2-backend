@@ -36,15 +36,23 @@ api_router.include_router(folders.router, prefix="/folders", tags=["folders"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
-
-@app.on_event("startup")
-async def startup_db_client():
-    pass
-
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    pass
+# rabbitmq_client = {}
+#
+#
+# @app.on_event("startup")
+# async def startup_rabbitmq_client():
+#     global rabbitmq_client
+#     rabbitmq_client = ExamplePublisher(
+#         "amqp://guest:guest@localhost:5672/%2F?connection_attempts=3&heartbeat=3600"
+#     )
+#     rabbitmq_client.run()
+#     return rabbitmq_client
+#
+#
+# @app.on_event("shutdown")
+# async def shutdown_rabbitmq_client():
+#     global rabbitmq_client
+#     rabbitmq_client.stop()
 
 
 @app.get("/")
