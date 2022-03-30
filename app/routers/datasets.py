@@ -121,7 +121,7 @@ async def edit_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.patch("/{dataset_id", response_model=DatasetOut)
+@router.patch("/{dataset_id}", response_model=DatasetOut)
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
