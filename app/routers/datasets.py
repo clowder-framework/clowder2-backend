@@ -137,7 +137,7 @@ async def patch_dataset(
         ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
-            dataset.update(ds)
+            dataset.update((k, v) for k, v in ds.items() if v is not None)
             await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
